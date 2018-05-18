@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+. /root/fs-env
+
+for d in ${BIOS_BOOTDEVS} ; do
+  d=${d/[0-9]/}
+  grub-install "${d}"
+done
