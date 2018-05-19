@@ -18,10 +18,11 @@ RUN env LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get install -q -y ubuntu-sta
                  openssh-server augeas-tools \
                  ssacli hpsmh cloud-init \
                  grub-efi-amd64-bin grub-efi-ia32-bin grub-efi-amd64-signed shim-signed shim syslinux isolinux hfsprogs hfsplus && apt-get clean all && \
-                 rm -f /etc/ssh/ssh_host_* && \
-                 mkdir -p /var/lib/cloud/instance/warnings && \
-                 touch /var/lib/cloud/instance/warnings/.skip && \
-                 printf '%s' 'network: {config: disabled}\n' > /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg
+                 rm -f /etc/ssh/ssh_host_*
+
+RUN sed -i -e '/ - locale/d' /etc/cloud/cloud.cfg
+
+ADD /cloud.cfg.d /etc/cloud/cloud.cfg.d
 
 RUN ln -sf /lib/systemd/system/systemd-networkd.service "/etc/systemd/system/multi-user.target.wants/systemd-networkd.service" && \
     mkdir -p "/etc/systemd/system/sockets.target.wants" && \
