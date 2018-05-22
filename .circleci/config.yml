@@ -6,6 +6,7 @@ jobs:
       - image: sandbox.docker.palantir.build/rbergeron/dind
     working_directory: /project
     environment:
+      DOCKER_SINK=sandbox.docker.palantir.build/rbergeron
     steps:
       - checkout
       - setup_remote_docker
@@ -14,4 +15,4 @@ jobs:
           command: ./build.sh
       - run:
           name: push base images
-          command: env DOCKER_SINK=sandbox.docker.palantir.build/rbergeron/xenial-bootable ./publish.sh
+          command: ./publish.sh
