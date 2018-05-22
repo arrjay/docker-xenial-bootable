@@ -30,9 +30,25 @@ RUN dpkg-divert --rename /usr/sbin/update-grub && ln -s /bin/true /usr/sbin/upda
     rm /usr/sbin/update-grub && dpkg-divert --rename --remove /usr/sbin/update-grub
 
 RUN apt-get update && env LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get -q -y install iomemory-vsl-dkms && \
+    find /usr/src/iomemory-* /etc/sysconfig/ -type d -exec chmod a+rx {} \; && \
     bash -c 'i=(/usr/src/iomemory-vsl*) && k=(/boot/vmlinuz-*) && k=${k[0]#*-} && \
     dkms add "${i[0]}" && dkms autoinstall -k "${k}"' && apt-get -q -y clean all && \
     rm -f /boot/initrd.*.old-dkms
+
+# add user
+RUN groupadd -g 1024 ejusdem && \
+    useradd --uid 1024 --gid 1024 ejusdem && \
+    usermod -G sudo ejusdem && \
+    mkdir /home/ejusdem && \
+    chown 1024:1024 /home/ejusdem
+
+# reconfigure sudo
+RUN bash -c 'autosudo=$(mktemp) && \
+    printf \#\!/bin/bash\\nsed\ -i\ -e\ \"s@^%%sudo.*@%%sudo\ ALL=\(ALL:ALL\)\ NOPASSWD:\ ALL@\"\ \${2} > "${autosudo}" && \
+    chmod +x "${autosudo}" && \
+    env EDITOR="${autosudo}" visudo && \
+    rm "${autosudo}"'
+
 
 # generate bootloader files
 ## isolinux...
