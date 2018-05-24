@@ -15,7 +15,8 @@ RUN echo "deb http://downloads.linux.hpe.com/SDR/downloads/MCP/ubuntu xenial/cur
     apt-key add /etc/apt/trusted.gpg.d/hpe.asc
 
 # install packages
-RUN apt-get update && \
+RUN dpkg-divert --rename /usr/sbin/update-grub && ln -s /bin/true /usr/sbin/update-grub && \
+    apt-get update && \
     env LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get install -q -y ubuntu-standard \
                  casper lupin-casper discover laptop-detect os-prober \
                  linux-generic dracut-core dbus \
@@ -23,20 +24,13 @@ RUN apt-get update && \
                  memtest86+ nwipe smartmontools lm-sensors ethtool smartmontools fio \
                  openssh-server augeas-tools \
                  ssacli hpsmh cloud-init \
+                 tboot \
+                 iomemory-vsl-dkms \
                  grub-efi-amd64-bin grub-efi-ia32-bin grub-efi-amd64-signed shim-signed shim syslinux isolinux hfsprogs hfsplus && \
     apt-get -q -y clean all && rm -rf /var/lib/apt/lists/* && \
-    rm -f /etc/ssh/ssh_host_*
-
-RUN dpkg-divert --rename /usr/sbin/update-grub && ln -s /bin/true /usr/sbin/update-grub && \
-    apt-get update && \
-    env LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get -q -y install tboot && \
-    apt-get -q -y clean all && rm -rf /var/lib/apt/lists/* && \
+    rm -f /etc/ssh/ssh_host_* && \
     printf 'GRUB_DISABLE_OS_PROBER=true\n' >> /etc/default/grub && \
-    rm /usr/sbin/update-grub && dpkg-divert --rename --remove /usr/sbin/update-grub
-
-RUN apt-get update && \
-    env LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get -q -y install iomemory-vsl-dkms && \
-    apt-get -q -y clean all && rm -rf /var/lib/apt/lists/* && \
+    rm /usr/sbin/update-grub && dpkg-divert --rename --remove /usr/sbin/update-grub && \
     find /usr/src/iomemory-* /etc/sysconfig/ -type d -exec chmod a+rx {} \; && \
     bash -c 'i=(/usr/src/iomemory-vsl*) && k=(/boot/vmlinuz-*) && k=${k[0]#*-} && \
     dkms add "${i[0]}" && dkms autoinstall -k "${k}"' && \
