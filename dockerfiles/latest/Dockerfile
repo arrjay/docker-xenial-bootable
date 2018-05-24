@@ -3,36 +3,43 @@ FROM build/0common
 MAINTAINER RJ Bergeron <rbergero@gmail.com>
 
 # re-configure apt
-RUN env LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get install -q -y software-properties-common && apt-get clean all
+RUN apt-get update && \
+    env LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get install -q -y software-properties-common && \
+    apt-get -q -y clean all && rm -rf /var/lib/apt/lists/*
 
-RUN add-apt-repository -m ppa:notarrjay/fio-dkms && apt-get update && apt-get clean all
+RUN add-apt-repository -m ppa:notarrjay/fio-dkms
 
 ADD apt-keys/hpe.asc /etc/apt/trusted.gpg.d/hpe.asc
 
 RUN echo "deb http://downloads.linux.hpe.com/SDR/downloads/MCP/ubuntu xenial/current non-free" > /etc/apt/sources.list.d/hpe.list && \
-    apt-key add /etc/apt/trusted.gpg.d/hpe.asc && \
-    apt-get update && apt-get clean all
+    apt-key add /etc/apt/trusted.gpg.d/hpe.asc
 
 # install packages
-RUN env LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get install -q -y ubuntu-standard \
+RUN apt-get update && \
+    env LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get install -q -y ubuntu-standard \
                  casper lupin-casper discover laptop-detect os-prober \
                  linux-generic dracut-core dbus \
                  lvm2 thin-provisioning-tools cryptsetup mdadm xfsprogs bcache-tools \
                  memtest86+ nwipe smartmontools lm-sensors ethtool smartmontools fio \
                  openssh-server augeas-tools \
                  ssacli hpsmh cloud-init \
-                 grub-efi-amd64-bin grub-efi-ia32-bin grub-efi-amd64-signed shim-signed shim syslinux isolinux hfsprogs hfsplus && apt-get clean all && \
-                 rm -f /etc/ssh/ssh_host_*
+                 grub-efi-amd64-bin grub-efi-ia32-bin grub-efi-amd64-signed shim-signed shim syslinux isolinux hfsprogs hfsplus && \
+    apt-get -q -y clean all && rm -rf /var/lib/apt/lists/* && \
+    rm -f /etc/ssh/ssh_host_*
 
 RUN dpkg-divert --rename /usr/sbin/update-grub && ln -s /bin/true /usr/sbin/update-grub && \
+    apt-get update && \
     env LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get -q -y install tboot && \
+    apt-get -q -y clean all && rm -rf /var/lib/apt/lists/* && \
     printf 'GRUB_DISABLE_OS_PROBER=true\n' >> /etc/default/grub && \
     rm /usr/sbin/update-grub && dpkg-divert --rename --remove /usr/sbin/update-grub
 
-RUN apt-get update && env LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get -q -y install iomemory-vsl-dkms && \
+RUN apt-get update && \
+    env LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get -q -y install iomemory-vsl-dkms && \
+    apt-get -q -y clean all && rm -rf /var/lib/apt/lists/* && \
     find /usr/src/iomemory-* /etc/sysconfig/ -type d -exec chmod a+rx {} \; && \
     bash -c 'i=(/usr/src/iomemory-vsl*) && k=(/boot/vmlinuz-*) && k=${k[0]#*-} && \
-    dkms add "${i[0]}" && dkms autoinstall -k "${k}"' && apt-get -q -y clean all && \
+    dkms add "${i[0]}" && dkms autoinstall -k "${k}"' && \
     rm -f /boot/initrd.*.old-dkms
 
 # add user
@@ -78,9 +85,6 @@ RUN wget -o /boot/macboot.img http://mirrors.kernel.org/fedora/releases/28/Serve
 
 # when/if we run grub-install
 ADD grub.d/* /etc/grub.d/
-
-# tpl files for iso9660 booting
-RUN bash -c 'd="" ; c="/isolinux/syslinux.cfg.tpl" ; g="/boot/grub/grub.cfg.tpl" ; for i in /boot/initrd.img* ; do v="${i%-generic*}" ; v="${v#*.img-}" ; { [ ! -z "${d}" ] && d="${v}" ; echo "DEFAULT ${v}" >> "${c}" ; } ; echo "LABEL ${v}" >> "${c}" ; echo " KERNEL vmlinuz-${v}-generic" >> "${c}" ; echo " INITRD initrd.img-${v}-generic" >> "${c}" ; echo " APPEND console=tty0 root=UNSET intel_iommu=on iommu=pt iommu=1 rw network-config=eyJuZXR3b3JrIjp7ImNvbmZpZyI6ImRpc2FibGVkIn19fQ==" >> "${c}" ; echo "menuentry '\''${v}'\'' {" >> "${g}" ; echo "  linux /boot/vmlinuz-${v}-generic console=tty0 root=UNSET intel_iommu=on iommu=pt iommu=1 rw  network-config=eyJuZXR3b3JrIjp7ImNvbmZpZyI6ImRpc2FibGVkIn19fQ==" >> "${g}" ; echo "  initrd /boot/initrd.img-${v}-generic" >> "${g}" ; echo "}" >> "${g}" ; done'
 
 # initrd modules
 ADD /iomemory-dracut /usr/lib/dracut/modules.d/10iomemory-md
