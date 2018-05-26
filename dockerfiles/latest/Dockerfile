@@ -26,7 +26,7 @@ RUN dpkg-divert --rename /usr/sbin/update-grub && ln -s /bin/true /usr/sbin/upda
                  ssacli hpsmh cloud-init \
                  tboot \
                  iomemory-vsl-dkms \
-                 grub-efi-amd64-bin grub-efi-ia32-bin grub-efi-amd64-signed shim-signed shim syslinux isolinux hfsprogs hfsplus && \
+                 grub-efi-amd64-bin grub-efi-ia32-bin grub-efi-amd64-signed shim-signed shim syslinux syslinux-utils isolinux hfsprogs hfsplus && \
     apt-get -q -y clean all && rm -rf /var/lib/apt/lists/* && \
     rm -f /etc/ssh/ssh_host_* && \
     printf 'GRUB_DISABLE_OS_PROBER=true\n' >> /etc/default/grub && \
