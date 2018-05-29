@@ -64,6 +64,9 @@ RUN grub-mkimage -O i386-efi -d /usr/lib/grub/i386-efi -o /usr/lib/grub/i386-efi
 # efi-x64
 RUN mkdir -p /boot/grub/x86_64-efi && cp /usr/lib/grub/x86_64-efi/*.mod /boot/grub/x86_64-efi
 
+# create efi directory for mounts
+RUN mkdir -p /boot/efi
+
 # uefi image here
 RUN truncate -s 12M /boot/efiboot.img && mkfs.vfat -F16 /boot/efiboot.img && \
       mmd -i /boot/efiboot.img efi && mmd -i /boot/efiboot.img efi/boot && \
