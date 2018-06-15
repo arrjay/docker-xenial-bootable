@@ -9,10 +9,13 @@ RUN apt-get update && \
 
 RUN add-apt-repository -m ppa:notarrjay/fio-dkms
 
-ADD apt-keys/hpe.asc /etc/apt/trusted.gpg.d/hpe.asc
+ADD apt-keys /etc/apt/trusted.gpg.d
 
 RUN echo "deb http://downloads.linux.hpe.com/SDR/downloads/MCP/ubuntu xenial/current non-free" > /etc/apt/sources.list.d/hpe.list && \
     apt-key add /etc/apt/trusted.gpg.d/hpe.asc
+
+RUN echo "deb http://red-jay.github.io/fio-drivers fio release" > /etc/apt/sources.list.d/fio.list && \
+    apt-key add /etc/apt/trusted.gpg.d/fio.asc
 
 # install packages
 RUN dpkg-divert --rename /usr/sbin/update-grub && ln -s /bin/true /usr/sbin/update-grub && \
@@ -26,6 +29,7 @@ RUN dpkg-divert --rename /usr/sbin/update-grub && ln -s /bin/true /usr/sbin/upda
                  ssacli hpsmh cloud-init \
                  tboot \
                  iomemory-vsl-dkms \
+		 fio-common fio-preinstall fio-sysvinit fio-util \
                  grub-efi-amd64-bin grub-efi-ia32-bin grub-efi-amd64-signed shim-signed shim syslinux syslinux-utils isolinux hfsprogs hfsplus && \
     apt-get -q -y clean all && rm -rf /var/lib/apt/lists/* && \
     rm -f /etc/ssh/ssh_host_* && \
