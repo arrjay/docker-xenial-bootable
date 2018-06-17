@@ -6,7 +6,7 @@ check() {
     # No mdadm?  No mdraid support.
     require_binaries mdadm || return 1
     fiomds=(/sys/block/md*/slaves/fio*)
-    if [ -e "${fiomds[0]}" ] ; then return 1 ; fi
+    if [ ! -e "${fiomds[0]}" ] ; then return 1 ; fi
 }
 
 # called by dracut

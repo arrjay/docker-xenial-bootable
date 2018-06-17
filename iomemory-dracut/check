@@ -1,7 +1,8 @@
-#!/bin/bash
+#!/usr/bin/env bash
+shopt -s nullglob
 
 # No point in trying this if we don't have mdraid
-which mdraid >/dev/null 2>&1 || exit 1
+which mdadm >/dev/null 2>&1 || exit 1
 
 . "$dracutfunctions"
 [[ $debug ]] && set -x
