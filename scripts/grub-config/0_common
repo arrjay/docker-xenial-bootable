@@ -2,6 +2,9 @@
 
 set -ex
 
+# turn off the hidden menu crap
+sed -i -e '/^GRUB_HIDDEN/d' /etc/default/grub
+
 # are you installing via a serial console _right now_? if so, config grub serialisms.
 if [ -z "${CONFIG_SERIAL_INSTALL}" ] ; then
   CONFIG_SERIAL_INSTALL=$(tty)
