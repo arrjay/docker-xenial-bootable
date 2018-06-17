@@ -108,6 +108,7 @@ RUN ln -sf /lib/systemd/system/systemd-networkd.service "/etc/systemd/system/mul
     rm -f "/etc/systemd/system/dbus-org.freedesktop.nm-dispatcher.service" && \
     mkdir -p "/etc/systemd/network"
 ADD /systemd-network /etc/systemd/network
+RUN find /etc/systemd/network -type f -exec chmod a+r {} \;
 
 # custom script to dump platform info to a directory for systemd hooks
 ADD platform-info/platform-info.service /etc/systemd/system/platform-info.service
