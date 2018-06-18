@@ -92,7 +92,7 @@ ADD grub.d/* /etc/grub.d/
 ADD /iomemory-dracut /usr/lib/dracut/modules.d/10iomemory-md
 
 # reconfigure cloud-init
-RUN sed -i -e '/ - locale/d' -e /datasource_list/d' /etc/cloud/cloud.cfg && \
+RUN sed -i -e '/ - locale/d' -e '/datasource_list/d' /etc/cloud/cloud.cfg && \
     echo 'datasource_list: [ "ConfigDrive", "OpenNebula", "OVF", "Azure", "Ec2", "GCE", "OpenStack", "CloudStack", "None" ]' >> /etc/cloud/cloud.cfg
 ADD /cloud.cfg.d /etc/cloud/cloud.cfg.d
 
