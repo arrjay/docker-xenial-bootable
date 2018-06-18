@@ -92,7 +92,8 @@ ADD grub.d/* /etc/grub.d/
 ADD /iomemory-dracut /usr/lib/dracut/modules.d/10iomemory-md
 
 # reconfigure cloud-init
-RUN sed -i -e '/ - locale/d' /etc/cloud/cloud.cfg
+RUN sed -i -e '/ - locale/d' -e /datasource_list/d' /etc/cloud/cloud.cfg &&
+    echo 'datasource_list: [ "ConfigDrive", "OpenNebula", "OVF", "Azure", "Ec2", "GCE", "OpenStack", "CloudStack", "None" ]' >> /etc/cloud/cloud.cfg
 ADD /cloud.cfg.d /etc/cloud/cloud.cfg.d
 
 # systemd-networkd for network config please
@@ -106,7 +107,8 @@ RUN ln -sf /lib/systemd/system/systemd-networkd.service "/etc/systemd/system/mul
     rm -f "/etc/systemd/system/dbus-org.freedesktop.NetworkManager.service" && \
     rm -f "/etc/systemd/system/multi-user.target.wants/NetworkManager.service" && \
     rm -f "/etc/systemd/system/dbus-org.freedesktop.nm-dispatcher.service" && \
-    mkdir -p "/etc/systemd/network"
+    mkdir -p "/etc/systemd/network" && \
+    rm -f "/etc/network/interfaces"
 ADD /systemd-network /etc/systemd/network
 RUN find /etc/systemd/network -type f -exec chmod a+r {} \;
 
