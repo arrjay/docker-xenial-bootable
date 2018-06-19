@@ -19,6 +19,7 @@ RUN echo "deb http://red-jay.github.io/fio-drivers fio release" > /etc/apt/sourc
 
 # install packages
 RUN dpkg-divert --rename /usr/sbin/update-grub && ln -s /bin/true /usr/sbin/update-grub && \
+    dpkg-divert --rename /etc/cloud/cloud.cfg.d/90_dpkg.cfg && \
     apt-get update && \
     env LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get install -q -y ubuntu-standard \
                  casper lupin-casper discover laptop-detect os-prober \
@@ -92,8 +93,7 @@ ADD grub.d/* /etc/grub.d/
 ADD /iomemory-dracut /usr/lib/dracut/modules.d/10iomemory-md
 
 # reconfigure cloud-init
-RUN sed -i -e '/ - locale/d' -e '/datasource_list/d' /etc/cloud/cloud.cfg && \
-    echo 'datasource_list: [ "ConfigDrive", "OpenNebula", "OVF", "Azure", "Ec2", "GCE", "OpenStack", "CloudStack", "None" ]' >> /etc/cloud/cloud.cfg
+RUN sed -i -e '/ - locale/d' -e '/datasource_list/d' /etc/cloud/cloud.cfg
 ADD /cloud.cfg.d /etc/cloud/cloud.cfg.d
 
 # systemd-networkd for network config please
