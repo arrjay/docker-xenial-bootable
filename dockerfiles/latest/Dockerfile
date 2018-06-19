@@ -98,6 +98,7 @@ ADD /cloud.cfg.d /etc/cloud/cloud.cfg.d
 
 # systemd-networkd for network config please
 RUN ln -sf /lib/systemd/system/systemd-networkd.service "/etc/systemd/system/multi-user.target.wants/systemd-networkd.service" && \
+    ln -sf /lib/systemd/system/systemd-resolved.service "/etc/systemd/system/multi-user.target.wants/systemd-resolved.service" && \
     mkdir -p "/etc/systemd/system/sockets.target.wants" && \
     ln -sf /lib/systemd/system/systemd-networkd.socket  "/etc/systemd/system/sockets.target.wants/systemd-networkd.service" && \
     ln -sf /dev/null "/etc/systemd/system/dhcpcd.service" && \
