@@ -21,16 +21,31 @@ case "${CONFIG_SERIAL_INSTALL}" in
     ;;
 esac
 
+# grab the command line we have here
+cmdline=$(augtool print /files/etc/default/grub/GRUB_CMDLINE_LINUX_DEFAULT)
+cmdline="${cmdline#* = }"
+# remove splash if we have that
+cmdline="${cmdline/splash/}"
+# add nomodeset
+cmdline="${cmdline:0:-3} nomodeset${cmdline: -3}"
+
 # now check if CONFIG_SERIAL_INSTALL is still set
+
 if [ ! -z "${CONFIG_SERIAL_INSTALL}" ] ; then
   {
     printf 'GRUB_SERIAL_COMMAND="serial --speed=115200 --unit=%s --word=8 --parity=no --stop=1"\n' "${CONFIG_SERIAL_INSTALL}"
     printf 'GRUB_TERMINAL="serial"\n'
   } >> /etc/default/grub
-  cmdline=$(augtool print /files/etc/default/grub/GRUB_CMDLINE_LINUX_DEFAULT)
-  cmdline="${cmdline#* = }"
-  cmdline="${cmdline/splash/}"
-  # since we know the _last_ three characters of this are quoting, splice like this
+  # add the serial port here - hardwired to 115200n8 tho
   cmdline="${cmdline:0:-3} console=ttyS${CONFIG_SERIAL_INSTALL},115200n8${cmdline: -3}"
-  augtool -s set /files/etc/default/grub/GRUB_CMDLINE_LINUX_DEFAULT "${cmdline}"
+else
+  printf 'GRUB_TERMINAL="console"\n' >> /etc/default/grub
 fi
+
+# update our cmdline, finally
+augtool -s set /files/etc/default/grub/GRUB_CMDLINE_LINUX_DEFAULT "${cmdline}"
+
+# hack vt_handoff out of mkconfig scripts
+for f in /etc/grub.d/* ; do
+  sed -i -e 's/^vt_handoff=.*/vt_handoff="0"/' "${f}"
+done
