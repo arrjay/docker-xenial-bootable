@@ -28,6 +28,7 @@ RUN dpkg-divert --rename /usr/sbin/update-grub && ln -s /bin/true /usr/sbin/upda
                  memtest86+ nwipe smartmontools lm-sensors ethtool smartmontools fio \
                  openssh-server augeas-tools \
                  ssacli hpsmh cloud-init \
+		 open-vm-tools \
                  tboot \
                  iomemory-vsl-dkms \
 		 fio-common fio-preinstall fio-sysvinit fio-util \
