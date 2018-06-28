@@ -12,8 +12,8 @@ Before=shutdown.target
 After=local-fs.target
 After=systemd-journald-dev-log.socket
 Conflicts=shutdown.target
-|ConditionKernelCommandLine=placeholder
-|ConditionVirtualization=false
+ConditionKernelCommandLine=|placeholder
+ConditionVirtualization=|false
 
 [Service]
 Type=forking
