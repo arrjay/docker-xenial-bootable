@@ -2,7 +2,7 @@
 
 pi_dir=/run/platform-info
 
-for f in /sys/class/dmi/id/board_vendor /sys/class/dmi/id/chassis_vendor ; do
+for f in /sys/class/dmi/id/board_vendor /sys/class/dmi/id/chassis_vendor /sys/class/dmi/id/bios_version /sys/class/dmi/id/board_version ; do
   words=''
   if [ -f "${f}" ] ; then
     b="${f##*/}"
