@@ -3,7 +3,7 @@
 set -ex
 
 [ "${DOCKER_SINK}" ] && {
-  docker pull "${DOCKER_SINK}/ubuntu:xenial"
+  [ -z "NOPUSH" ] && docker pull "${DOCKER_SINK}/ubuntu:xenial"
   docker tag  "${DOCKER_SINK}/ubuntu:xenial" "ubuntu:xenial"
 }
 
