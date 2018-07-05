@@ -15,7 +15,7 @@ kick_fio_array(){
       esac
     done
     # we have an array, cool.
-    [ -e "/dev/md/${name}" ] && return 0
+    [ -e "/dev/md/${name}" ] && continue
     # try assembly
     mdadm --assemble "/dev/md/${name}" -u "${uuid#UUID=}"
   done < "${1}" | vinfo
