@@ -36,12 +36,18 @@ RUN dpkg-divert --rename /usr/sbin/update-grub && ln -s /bin/true /usr/sbin/upda
     apt-get -q -y clean all && rm -rf /var/lib/apt/lists/* && \
     rm -f /etc/ssh/ssh_host_* && \
     rm -f /etc/dracut.conf.d/iomemory-vsl.conf && \
+    sed -i \
+      -e 's/splash/video=720x400 vt.color=0x30 consoleblank=0 vt.default_red=7,220,133,181,38,211,42,238,0,203,88,101,131,108,147,253 vt.default_grn=54,50,153,137,139,54,161,232,43,75,110,123,148,113,161,246 vt.default_blu=66,47,0,0,210,130,152,213,54,22,117,131,150,196,161,227 vt.color=0x70/' \
+      /etc/default/grub && \
     printf 'GRUB_DISABLE_OS_PROBER=true\n' >> /etc/default/grub && \
     rm /usr/sbin/update-grub && dpkg-divert --rename --remove /usr/sbin/update-grub && \
     find /usr/src/iomemory-* /etc/sysconfig/ -type d -exec chmod a+rx {} \; && \
     bash -c 'i=(/usr/src/iomemory-vsl*) && k=(/boot/vmlinuz-*) && k=${k[0]#*-} && \
     dkms add "${i[0]}" && dkms autoinstall -k "${k}"' && \
     rm -f /boot/initrd.*.old-dkms
+
+# add vconsole config
+ADD vconsole.conf /etc/vconsole.conf
 
 # add user
 RUN groupadd -g 1024 ejusdem && \
