@@ -100,7 +100,7 @@ ADD grub.d/* /etc/grub.d/
 ADD /iomemory-dracut /usr/lib/dracut/modules.d/10iomemory-md
 
 # reconfigure cloud-init
-RUN sed -i -e '/ - locale/d' -e '/datasource_list/d' /etc/cloud/cloud.cfg
+RUN sed -i -e '/ - locale/d' -e '/datasource_list/d' -e 's/ - default/ - ejusdem/' /etc/cloud/cloud.cfg
 ADD /cloud.cfg.d /etc/cloud/cloud.cfg.d
 
 # systemd-networkd for network config please
