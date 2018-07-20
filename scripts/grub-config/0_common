@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+. /root/fs-env
+
 set -ex
 
 # turn off the hidden menu crap
