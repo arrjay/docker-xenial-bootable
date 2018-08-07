@@ -1,6 +1,6 @@
 FROM build/0common
 
-MAINTAINER RJ <rbergero@gmail.com>
+MAINTAINER Copmpute Tools <id-computetools-team@palantir.com>
 
 RUN apt-get update && \
     env LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get install -q -y dpkg-dev debhelper dput devscripts ubuntu-dev-tools && \
