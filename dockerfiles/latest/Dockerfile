@@ -5,10 +5,11 @@ MAINTAINER Compute Tools <id-computetools-team@palantir.com>
 # install packages
 RUN dpkg-divert --rename /usr/sbin/update-grub && ln -s /bin/true /usr/sbin/update-grub && \
     dpkg-divert --rename /etc/cloud/cloud.cfg.d/90_dpkg.cfg && \
+    echo "openssh-server HostKey string /dev/null" | debconf-set-selections && \
     apt-get update && \
     env LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -q -y \
-                 casper lupin-casper discover laptop-detect os-prober \
-                 linux-generic dracut-core dbus \
+                 discover laptop-detect os-prober \
+                 linux-generic dbus \
                  lvm2 thin-provisioning-tools cryptsetup xfsprogs \
                  openssh-server augeas-tools \
                  cloud-init \
@@ -17,7 +18,8 @@ RUN dpkg-divert --rename /usr/sbin/update-grub && ln -s /bin/true /usr/sbin/upda
     apt-get -q -y clean all && rm -rf /var/lib/apt/lists/* && \
     rm -f /etc/ssh/ssh_host_* && \
     printf 'GRUB_DISABLE_OS_PROBER=true\n' >> /etc/default/grub && \
-    rm /usr/sbin/update-grub && dpkg-divert --rename --remove /usr/sbin/update-grub
+    rm /usr/sbin/update-grub && dpkg-divert --rename --remove /usr/sbin/update-grub && \
+    echo RESET HostKey | debconf-communicate openssh-server
 
 # generate bootloader files
 # efi-x64
