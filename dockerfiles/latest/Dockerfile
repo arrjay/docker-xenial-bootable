@@ -4,7 +4,7 @@ MAINTAINER Compute Tools <id-computetools-team@palantir.com>
 
 # re-configure apt
 RUN apt-get update && \
-    env LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get install -q -y software-properties-common && \
+    env LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -q -y software-properties-common && \
     apt-get -q -y clean all && rm -rf /var/lib/apt/lists/*
 
 ADD apt-keys /etc/apt/trusted.gpg.d
@@ -13,7 +13,7 @@ ADD apt-keys /etc/apt/trusted.gpg.d
 RUN dpkg-divert --rename /usr/sbin/update-grub && ln -s /bin/true /usr/sbin/update-grub && \
     dpkg-divert --rename /etc/cloud/cloud.cfg.d/90_dpkg.cfg && \
     apt-get update && \
-    env LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get install -q -y ubuntu-standard \
+    env LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -q -y ubuntu-standard \
                  casper lupin-casper discover laptop-detect os-prober \
                  linux-generic dracut-core dbus \
                  lvm2 thin-provisioning-tools cryptsetup xfsprogs \
