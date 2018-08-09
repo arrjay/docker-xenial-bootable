@@ -21,6 +21,8 @@ RUN dpkg-divert --rename /usr/sbin/update-grub && ln -s /bin/true /usr/sbin/upda
     rm /usr/sbin/update-grub && dpkg-divert --rename --remove /usr/sbin/update-grub && \
     echo RESET HostKey | debconf-communicate openssh-server
 
+ADD cloud.cfg.d/* /etc/cloud/cloud.cfg.d
+
 # generate bootloader files
 # efi-x64
 RUN mkdir -p /boot/grub/x86_64-efi && cp /usr/lib/grub/x86_64-efi/*.mod /boot/grub/x86_64-efi
