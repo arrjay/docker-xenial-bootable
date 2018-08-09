@@ -24,10 +24,6 @@ esac
 # grab the command line we have here
 cmdline=$(augtool print /files/etc/default/grub/GRUB_CMDLINE_LINUX_DEFAULT)
 cmdline="${cmdline#* = }"
-# remove splash if we have that
-cmdline="${cmdline/splash/}"
-# add nomodeset
-cmdline="${cmdline:0:-3} nomodeset${cmdline: -3}"
 
 # now check if CONFIG_SERIAL_INSTALL is still set
 

@@ -28,10 +28,16 @@ ADD cloud.cfg.d/* /etc/cloud/cloud.cfg.d/
 RUN sed -i -e '/ - locale/d' -e '/datasource_list/d' /etc/cloud/cloud.cfg
 
 # NO REALLY CLOUD-INIT STOPPIT. let's configure what we can for grub here, sure.
+# we also remove ubuntu's dippy splash, but keep quiet.
 RUN bash -c 'set -eux ; \
      c="$(augtool print /files/etc/default/grub/GRUB_CMDLINE_LINUX_DEFAULT)" ; \
-     c="${c#* = }" ; c="${c:0:-3} network-config=e2NvbmZpZzogZGlzYWJsZWR9${c: -3}" ; \
+     c="${c#* = }" ; \
+     c="${c/splash/}" ; \
+     c="${c:0:-3} nomodeset network-config=e2NvbmZpZzogZGlzYWJsZWR9${c: -3}" ; \
      augtool -s set /files/etc/default/grub/GRUB_CMDLINE_LINUX_DEFAULT "${c}"'
+# FFS. this will likely need reconsideration in vmware.
+rm -f /etc/systemd/system/cloud-init.target.wants/cloud-init-local.service
+ln -s /dev/null /etc/systemd/system/cloud-init-local.service
 
 # generate bootloader files
 # efi-x64
