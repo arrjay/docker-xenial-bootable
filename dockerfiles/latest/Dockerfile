@@ -14,7 +14,7 @@ RUN dpkg-divert --rename /usr/sbin/update-grub && ln -s /bin/true /usr/sbin/upda
                  openssh-server augeas-tools \
                  cloud-init \
 		 open-vm-tools \
-                 grub-efi-amd64-bin grub-efi-amd64-signed shim-signed shim && \
+                 grub-pc grub-efi-amd64-bin grub-efi-amd64-signed shim-signed shim && \
     apt-get -q -y clean all && rm -rf /var/lib/apt/lists/* && \
     rm -f /etc/ssh/ssh_host_* && \
     printf 'GRUB_DISABLE_OS_PROBER=true\n' >> /etc/default/grub && \
