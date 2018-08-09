@@ -2,6 +2,9 @@
 
 set -ex
 
+# pick up any config from host env here
+. /root/fs-env
+
 # turn off the hidden menu crap
 sed -i -e '/^GRUB_HIDDEN/d' /etc/default/grub
 
