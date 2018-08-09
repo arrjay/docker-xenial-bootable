@@ -21,7 +21,11 @@ RUN dpkg-divert --rename /usr/sbin/update-grub && ln -s /bin/true /usr/sbin/upda
     rm /usr/sbin/update-grub && dpkg-divert --rename --remove /usr/sbin/update-grub && \
     echo RESET HostKey | debconf-communicate openssh-server
 
+# reconfigure cloud-init the files to replace os-shipped and add things...
 ADD cloud.cfg.d/* /etc/cloud/cloud.cfg.d
+# but this sed line should stop locale reconfiguration. because these images are not really for humans.
+# we also shot datasource enumeration in oooold cloud init. eh.
+RUN sed -i -e '/ - locale/d' -e '/datasource_list/d' /etc/cloud/cloud.cfg
 
 # generate bootloader files
 # efi-x64
