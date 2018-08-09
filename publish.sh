@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -ex
+
 ts=$(date +%s)
 
 for img in $(docker images "build/*" --format "{{.Repository}}:{{.Tag}}") ; do
