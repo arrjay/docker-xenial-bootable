@@ -27,6 +27,12 @@ ADD cloud.cfg.d/* /etc/cloud/cloud.cfg.d/
 # we also shot datasource enumeration in oooold cloud init. eh.
 RUN sed -i -e '/ - locale/d' -e '/datasource_list/d' /etc/cloud/cloud.cfg
 
+# NO REALLY CLOUD-INIT STOPPIT. let's configure what we can for grub here, sure.
+RUN bash -c 'set -eux ; \
+     c="$(augtool print /files/etc/default/grub/GRUB_CMDLINE_LINUX_DEFAULT)" ; \
+     c="${c#* = }" ; c="${c:0:-3} network-config=e2NvbmZpZzogZGlzYWJsZWR9${c: -3}" ; \
+     augtool -s set /files/etc/default/grub/GRUB_CMDLINE_LINUX_DEFAULT "${c}"'
+
 # generate bootloader files
 # efi-x64
 RUN mkdir -p /boot/grub/x86_64-efi && cp /usr/lib/grub/x86_64-efi/*.mod /boot/grub/x86_64-efi

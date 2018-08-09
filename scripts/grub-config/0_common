@@ -5,9 +5,6 @@ set -ex
 # pick up any config from host env here
 . /root/fs-env
 
-# turn off the hidden menu crap
-sed -i -e '/^GRUB_HIDDEN/d' /etc/default/grub
-
 # are you installing via a serial console _right now_? if so, config grub serialisms.
 if [ -z "${CONFIG_SERIAL_INSTALL}" ] ; then
   CONFIG_SERIAL_INSTALL=$(tty)
@@ -44,6 +41,8 @@ if [ ! -z "${CONFIG_SERIAL_INSTALL}" ] ; then
 else
   printf 'GRUB_TERMINAL="console"\n' >> /etc/default/grub
 fi
+
+echo "setting GRUB_CMDLINE_LINUX_DEFAULT to ${cmdline}"
 
 # update our cmdline, finally
 augtool -s set /files/etc/default/grub/GRUB_CMDLINE_LINUX_DEFAULT "${cmdline}"
