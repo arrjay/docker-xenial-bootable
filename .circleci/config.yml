@@ -14,5 +14,9 @@ jobs:
           name: build images
           command: ./build.sh
       - run:
+          name: docker login
+          command: |
+              docker login -u $ARTIFACTORY_USERNAME -p $ARTIFACTORY_PASSWORD docker.palantir.build
+      - run:
           name: push base images
           command: ./publish.sh
