@@ -1,0 +1,42 @@
+# filter if not block add
+ACTION!="add", GOTO="ec2_attach_end"
+SUBSYSTEM!="block", GOTO="ec2_attach_end"
+
+# filter if not ebs model
+ENV{ID_SERIAL}!="Amazon Elastic Block Store*", GOTO="ec2_attach_ebs_end"
+
+# filter if disk or partition
+ENV{DEVTYPE}=="disk", GOTO="ec2_attach_ebs_start"
+ENV{DEVTYPE}=="partition", GOTO="ec2_attach_ebs_start"
+GOTO="ec2_attach_ebs_end"
+
+# for attaching ebs disks or partitions.
+LABEL="ec2_attach_ebs_start"
+
+# the program works either way, but we do some hilarity for partitions. run and save.
+PROGRAM="/bin/bash -c 'while IFS= read -r l ; do case \"$l\" in 0000:*) l=\"${l##* }\" ; l=\"${l//[^A-Za-z0-9]/}\" ; [ \"$l\" ] || exit 1 ; echo -n $l ;; esac done <<< \"$(nvme id-ctrl -v /dev/%P)\"'",ENV{EC2_ATTACH_CONFIG}="%c"
+
+# ... well, ec2 says one thing, so let's do _that_
+PROGRAM="/bin/bash -c 't=$env{ID_SERIAL_SHORT};echo ${t#vol}'",ENV{EC2_SHORTVOL}="%c"
+
+# disk case - note we get launch config and ebs record
+ENV{DEVTYPE}=="disk",SYMLINK+="disk/cloud/ec2-$env{EC2_ATTACH_CONFIG}",SYMLINK+="disk/cloud/ebs-vol-$env{EC2_SHORTVOL}",GOTO="ec2_attach_end"
+
+# partition case
+PROGRAM="/bin/bash -c 'p=$env{EC2_ATTACH_CONFIG} ; case $p in *1) o=\"${p}p$env{ID_PART_ENTRY_NUMBER}\" ;; esac ; [ \"$o\" ] || exit 1 ; echo -n $o",SYMLINK+="d
+isk/cloud/ec2-%c",SYMLINK+="disk/cloud/ebs-vol-$env{EC2_SHORTVOL}p$env{ID_PART_ENTRY_NUMBER}"
+
+# enough about EBS.
+LABEL="ec2_attach_ebs_end"
+
+# ephemeral volumes!
+ENV{ID_MODEL}!="Amazon EC2 NVMe Instance Storage*", GOTO="ec2_attach_instance_end"
+
+# filter if disk or partition
+#ENV{DEVTYPE}=="disk", GOTO="ec2_attach_ephemeral_start"
+#ENV{DEVTYPE}=="partition", GOTO="ec2_attach_ephemeral_start"
+GOTO="ec2_attach_instance_end"
+
+LABEL="ec2_attach_instance_end"
+
+LABEL="ec2_attach_end"

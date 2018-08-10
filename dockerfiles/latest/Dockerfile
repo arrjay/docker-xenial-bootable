@@ -13,6 +13,7 @@ RUN dpkg-divert --rename /usr/sbin/update-grub && ln -s /bin/true /usr/sbin/upda
                  lvm2 thin-provisioning-tools cryptsetup xfsprogs \
                  openssh-server augeas-tools \
                  cloud-init \
+		 nvme-cli \
 		 open-vm-tools \
                  grub-pc-bin grub-efi-amd64-bin grub-efi-amd64-signed shim-signed shim && \
     sed -i -e 's/crc32c//' /etc/dracut.conf.d/10-debian.conf && \
@@ -25,6 +26,9 @@ RUN dpkg-divert --rename /usr/sbin/update-grub && ln -s /bin/true /usr/sbin/upda
 # add dracut and modprobe config for additional drivers
 ADD modprobe.d/* /etc/modprobe.d/
 ADD dracut.conf.d/* /etc/dracut.conf.d/
+
+# add udev config for stabilized madness
+ADD udev-rules.d/* /etc/udev/rules.d/
 
 # reconfigure cloud-init the files to replace os-shipped and add things...
 ADD cloud.cfg.d/* /etc/cloud/cloud.cfg.d/
