@@ -14,8 +14,8 @@
 # ebs-vol-034513de722680145
 # ebs-vol-034513de722680145p1
 
-# filter if not block add
-ACTION!="add", GOTO="ec2_attach_end"
+# filter if not block add|change
+ACTION!="add|change", GOTO="ec2_attach_end"
 SUBSYSTEM!="block", GOTO="ec2_attach_end"
 
 # filter if not ebs model
