@@ -1,3 +1,19 @@
+# the intention of this udev ruleset is to create disk symlinks under /dev/disk/cloud for aws ec2/ebs entities
+
+# ec2 configuration is prefixed with 'ec2-' and the short name of the disk, for example:
+# ec2-sda1
+# ec2-sda1p1
+# ec2-sda1p2
+# ec2-sdf
+# ec2-sdf1
+
+# note the very subtle special casing of the the xxx1 mapping so that we stick 'p' infix in - sda11 is ambiguous if the top dev is sda1.
+
+# ebs configuration is prefixed with ebs, then unwound to vol- as _that's what the console shows_. we use the p infix here, though AWS is unclear
+# if ebs names will remain hex, or just a specific length.
+# ebs-vol-034513de722680145
+# ebs-vol-034513de722680145p1
+
 # filter if not block add
 ACTION!="add", GOTO="ec2_attach_end"
 SUBSYSTEM!="block", GOTO="ec2_attach_end"
@@ -14,7 +30,8 @@ GOTO="ec2_attach_ebs_end"
 LABEL="ec2_attach_ebs_start"
 
 # the program works either way, but we do some hilarity for partitions. run and save.
-PROGRAM="/bin/bash -c 'while IFS= read -r l ; do case \"$l\" in 0000:*) l=\"${l##* }\" ; l=\"${l//[^A-Za-z0-9]/}\" ; [ \"$l\" ] || exit 1 ; echo -n $l ;; esac done <<< \"$(nvme id-ctrl -v /dev/%P)\"'",ENV{EC2_ATTACH_CONFIG}="%c"
+# the ec2 console/nvme id disagree about whether /dev/ is included - we always strip it.
+PROGRAM="/bin/bash -c 'd=\"/dev/\" ; while IFS= read -r l ; do case \"$l\" in 0000:*) l=\"${l##* }\" ; l=\"${l/$d/}\" ;l=\"${l//[^A-Za-z0-9]/}\" ; [ \"$l\" ] || exit 1 ; echo -n $l ;; esac done <<< \"$(nvme id-ctrl -v /dev/%P)\"'",ENV{EC2_ATTACH_CONFIG}="%c"
 
 # ... well, ec2 says one thing, so let's do _that_
 PROGRAM="/bin/bash -c 't=$env{ID_SERIAL_SHORT};echo ${t#vol}'",ENV{EC2_SHORTVOL}="%c"
@@ -23,8 +40,7 @@ PROGRAM="/bin/bash -c 't=$env{ID_SERIAL_SHORT};echo ${t#vol}'",ENV{EC2_SHORTVOL}
 ENV{DEVTYPE}=="disk",SYMLINK+="disk/cloud/ec2-$env{EC2_ATTACH_CONFIG}",SYMLINK+="disk/cloud/ebs-vol-$env{EC2_SHORTVOL}",GOTO="ec2_attach_end"
 
 # partition case
-PROGRAM="/bin/bash -c 'p=$env{EC2_ATTACH_CONFIG} ; case $p in *1) o=\"${p}p$env{ID_PART_ENTRY_NUMBER}\" ;; esac ; [ \"$o\" ] || exit 1 ; echo -n $o",SYMLINK+="d
-isk/cloud/ec2-%c",SYMLINK+="disk/cloud/ebs-vol-$env{EC2_SHORTVOL}p$env{ID_PART_ENTRY_NUMBER}"
+PROGRAM="/bin/bash -c 'p=$env{EC2_ATTACH_CONFIG} ; case $p in *1) o=\"${p}p$env{ID_PART_ENTRY_NUMBER}\" ;; *) o=\"${p}$env{ID_PART_ENTRY_NUMBER}\" ;; esac ; [ \"$o\" ] || exit 1 ; echo -n $o",SYMLINK+="disk/cloud/ec2-%c",SYMLINK+="disk/cloud/ebs-vol-$env{EC2_SHORTVOL}p$env{ID_PART_ENTRY_NUMBER}"
 
 # enough about EBS.
 LABEL="ec2_attach_ebs_end"
