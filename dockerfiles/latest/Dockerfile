@@ -15,6 +15,7 @@ RUN dpkg-divert --rename /usr/sbin/update-grub && ln -s /bin/true /usr/sbin/upda
                  cloud-init \
 		 open-vm-tools \
                  grub-pc-bin grub-efi-amd64-bin grub-efi-amd64-signed shim-signed shim && \
+    sed -i -e 's/crc32c//' /etc/dracut.conf.d/10-debian.conf && \
     apt-get -q -y clean all && rm -rf /var/lib/apt/lists/* && \
     rm -f /etc/ssh/ssh_host_* && \
     printf 'GRUB_DISABLE_OS_PROBER=true\n' >> /etc/default/grub && \
