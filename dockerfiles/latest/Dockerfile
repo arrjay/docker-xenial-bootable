@@ -38,7 +38,7 @@ RUN bash -c 'set -eux ; \
      c="$(augtool print /files/etc/default/grub/GRUB_CMDLINE_LINUX_DEFAULT)" ; \
      c="${c#* = }" ; \
      c="${c/splash/}" ; \
-     c="${c:0:-3} nomodeset network-config=e2NvbmZpZzogZGlzYWJsZWR9${c: -3}" ; \
+     c="${c:0:-3} nomodeset net.ifnames=0 network-config=e2NvbmZpZzogZGlzYWJsZWR9${c: -3}" ; \
      augtool -s set /files/etc/default/grub/GRUB_CMDLINE_LINUX_DEFAULT "${c}"'&& \
     rm -f /etc/systemd/system/cloud-init.target.wants/cloud-init-local.service && \
     ln -s /dev/null /etc/systemd/system/cloud-init-local.service
