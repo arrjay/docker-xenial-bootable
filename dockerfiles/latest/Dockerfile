@@ -30,7 +30,11 @@ ADD dracut.conf.d/* /etc/dracut.conf.d/
 ADD cloud.cfg.d/* /etc/cloud/cloud.cfg.d/
 # but this sed line should stop locale reconfiguration. because these images are not really for humans.
 # we also shot datasource enumeration in oooold cloud init. eh.
-RUN sed -i -e '/ - locale/d' -e '/datasource_list/d' /etc/cloud/cloud.cfg
+RUN sed -i -e '/ - locale/d' \
+     -e '/datasource_list/d' \
+     -e '/ - apt-pipelining/d' \
+     -e '/ - apt-configure/d' \
+    /etc/cloud/cloud.cfg
 
 # NO REALLY CLOUD-INIT STOPPIT. let's configure what we can for grub here, sure.
 # we also remove ubuntu's dippy splash, but keep quiet.
