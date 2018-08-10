@@ -21,6 +21,10 @@ RUN dpkg-divert --rename /usr/sbin/update-grub && ln -s /bin/true /usr/sbin/upda
     rm /usr/sbin/update-grub && dpkg-divert --rename --remove /usr/sbin/update-grub && \
     echo RESET HostKey | debconf-communicate openssh-server
 
+# add dracut and modprobe config for additional drivers
+ADD modprobe.d/* /etc/modprobe.d/
+ADD dracut.conf.d/* /etc/dracut.conf.d/
+
 # reconfigure cloud-init the files to replace os-shipped and add things...
 ADD cloud.cfg.d/* /etc/cloud/cloud.cfg.d/
 # but this sed line should stop locale reconfiguration. because these images are not really for humans.
