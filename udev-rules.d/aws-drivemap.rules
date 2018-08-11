@@ -2,10 +2,10 @@
 
 # ec2 configuration is prefixed with 'ec2-' and the short name of the disk, for example:
 # ec2-sda1
-# ec2-sda1p1
-# ec2-sda1p2
+# ec2-sda1-part1
+# ec2-sda1-part2
 # ec2-sdf
-# ec2-sdf1
+# ec2-sdf-part1
 
 # note the very subtle special casing of the the xxx1 mapping so that we stick 'p' infix in - sda11 is ambiguous if the top dev is sda1.
 
@@ -29,7 +29,7 @@ GOTO="ec2_attach_ebs_end"
 # for attaching ebs disks or partitions.
 LABEL="ec2_attach_ebs_start"
 
-# the program works either way, but we do some hilarity for partitions. run and save.
+# the program works either way, but we do some additional hilarity for partitions. run and save.
 # the ec2 console/nvme id disagree about whether /dev/ is included - we always strip it.
 PROGRAM="/bin/bash -c 'd=\"/dev/\" ; while IFS= read -r l ; do case \"$l\" in 0000:*) l=\"${l##* }\" ; l=\"${l/$d/}\" ;l=\"${l//[^A-Za-z0-9]/}\" ; [ \"$l\" ] || exit 1 ; echo -n $l ;; esac done <<< \"$(nvme id-ctrl -v /dev/%P)\"'",ENV{EC2_ATTACH_CONFIG}="%c"
 
@@ -39,8 +39,8 @@ PROGRAM="/bin/bash -c 't=$env{ID_SERIAL_SHORT};echo ${t#vol}'",ENV{EC2_SHORTVOL}
 # disk case - note we get launch config and ebs record
 ENV{DEVTYPE}=="disk",SYMLINK+="disk/cloud/ec2-$env{EC2_ATTACH_CONFIG}",SYMLINK+="disk/cloud/ebs-vol-$env{EC2_SHORTVOL}",GOTO="ec2_attach_end"
 
-# partition case
-PROGRAM="/bin/bash -c 'p=$env{EC2_ATTACH_CONFIG} ; case $p in *1) o=\"${p}p$env{ID_PART_ENTRY_NUMBER}\" ;; *) o=\"${p}$env{ID_PART_ENTRY_NUMBER}\" ;; esac ; [ \"$o\" ] || exit 1 ; echo -n $o",SYMLINK+="disk/cloud/ec2-%c",SYMLINK+="disk/cloud/ebs-vol-$env{EC2_SHORTVOL}p$env{ID_PART_ENTRY_NUMBER}"
+# partition case - always use -partX suffix
+SYMLINK+="disk/cloud/ec2-$env{EC2_ATTACH_CONFIG}-part$env{ID_PART_ENTRY_NUMBER}",SYMLINK+="disk/cloud/ebs-vol-$env{EC2_SHORTVOL}-part$env{ID_PART_ENTRY_NUMBER}"
 
 # enough about EBS.
 LABEL="ec2_attach_ebs_end"
@@ -49,9 +49,17 @@ LABEL="ec2_attach_ebs_end"
 ENV{ID_MODEL}!="Amazon EC2 NVMe Instance Storage*", GOTO="ec2_attach_instance_end"
 
 # filter if disk or partition
-#ENV{DEVTYPE}=="disk", GOTO="ec2_attach_ephemeral_start"
-#ENV{DEVTYPE}=="partition", GOTO="ec2_attach_ephemeral_start"
+ENV{DEVTYPE}=="disk", GOTO="ec2_attach_instance_start"
+ENV{DEVTYPE}=="partition", GOTO="ec2_attach_instance_start"
 GOTO="ec2_attach_instance_end"
+
+LABEL="ec2_attach_instance_start"
+
+# we take the MINOR number here and...hope?
+ENV{DEVTYPE}=="disk",SYMLINK+="disk/cloud/ec2-ephemeral$env{MINOR}",GOTO="ec2_attach_end"
+
+# partitions handled here
+SYMLINK+="disk/cloud/ec2-ephemeral$env{MINOR}-part$env{ID_PART_ENTRY_NUMBER}"
 
 LABEL="ec2_attach_instance_end"
 
