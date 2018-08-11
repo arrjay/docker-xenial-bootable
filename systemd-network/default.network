@@ -1,10 +1,10 @@
 [Match]
 Name=em* eth* en*
 [Network]
-LinkLocalAddressing=yes
-LLMNR=true
+LinkLocalAddressing=no
+LLMNR=no
 IPv6AcceptRA=yes
 DHCP=yes
-MulticastDNS=yes
-LLDP=yes
-EmitLLDP=yes
+MulticastDNS=no
+LLDP=no
+EmitLLDP=no
