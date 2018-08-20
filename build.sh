@@ -3,8 +3,8 @@
 set -ex
 
 [ "${DOCKER_SINK}" ] && {
-  [ -z "$NOPUSH" ] && docker pull "${DOCKER_SINK}/ubuntu:xenial"
-  docker tag  "${DOCKER_SINK}/ubuntu:xenial" "ubuntu:xenial"
+  [ -z "$NOPUSH" ] && docker pull "${DOCKER_SINK}/ubuntu:16.04"
+  docker tag  "${DOCKER_SINK}/ubuntu:16.04" "ubuntu:16.04"
 }
 
 set -u

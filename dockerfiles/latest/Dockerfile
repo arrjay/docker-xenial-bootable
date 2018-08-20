@@ -1,6 +1,6 @@
 FROM build/0common
 
-MAINTAINER RJ Bergeron <rbergero@gmail.com>
+MAINTAINER RJ <rbergero@gmail.com>
 
 # re-configure apt
 RUN apt-get update && \
@@ -21,15 +21,16 @@ RUN echo "deb http://red-jay.github.io/fio-drivers fio release" > /etc/apt/sourc
 # install packages
 RUN dpkg-divert --rename /usr/sbin/update-grub && ln -s /bin/true /usr/sbin/update-grub && \
     dpkg-divert --rename /etc/cloud/cloud.cfg.d/90_dpkg.cfg && \
+    echo "openssh-server HostKey string /dev/null" | debconf-set-selections && \
     apt-get update && \
     env LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get --no-install-recommends install -q -y \
                  ubuntu-standard \
-                 casper lupin-casper discover laptop-detect os-prober \
+                 discover laptop-detect os-prober \
                  linux-generic dracut-core dbus \
                  lvm2 thin-provisioning-tools cryptsetup mdadm xfsprogs bcache-tools \
                  memtest86+ nwipe smartmontools lm-sensors ethtool smartmontools fio \
                  openssh-server augeas-tools \
-                 ssacli hpsmh cloud-init \
+                 cloud-init \
 		 open-vm-tools \
                  tboot \
                  iomemory-vsl-dkms \
@@ -48,7 +49,8 @@ RUN dpkg-divert --rename /usr/sbin/update-grub && ln -s /bin/true /usr/sbin/upda
     find /usr/src/iomemory-* /etc/sysconfig/ -type d -exec chmod a+rx {} \; && \
     bash -c 'i=(/usr/src/iomemory-vsl*) && k=(/boot/vmlinuz-*) && k=${k[0]#*-} && \
     dkms add "${i[0]}" && dkms autoinstall -k "${k}"' && \
-    rm -f /boot/initrd.*.old-dkms
+    rm -f /boot/initrd.*.old-dkms && \
+    echo RESET HostKey | debconf-communicate openssh-server
 
 # add vconsole config
 ADD vconsole.conf /etc/vconsole.conf
@@ -67,7 +69,6 @@ RUN bash -c 'autosudo=$(mktemp) && \
     env EDITOR="${autosudo}" visudo && \
     rm "${autosudo}"'
 
-
 # generate bootloader files
 ## isolinux...
 RUN mkdir /isolinux && cp /usr/lib/ISOLINUX/isolinux.bin /isolinux/isolinux.bin && \
@@ -83,19 +84,6 @@ RUN mkdir -p /boot/grub/x86_64-efi && cp /usr/lib/grub/x86_64-efi/*.mod /boot/gr
 
 # create efi directory for mounts
 RUN mkdir -p /boot/efi
-
-# uefi image here
-RUN truncate -s 12M /boot/efiboot.img && mkfs.vfat -F16 /boot/efiboot.img && \
-      mmd -i /boot/efiboot.img efi && mmd -i /boot/efiboot.img efi/boot && \
-      mcopy -i /boot/efiboot.img /usr/lib/shim/shimx64.efi.signed ::efi/boot/bootx64.efi && \
-      mcopy -i /boot/efiboot.img /usr/lib/grub/x86_64-efi-signed/gcdx64.efi.signed ::efi/boot/grubx64.efi && \
-      mcopy -i /boot/efiboot.img /usr/lib/grub/i386-efi/gcdia32.efi ::efi/boot/bootia32.efi && \
-      mmd -i /boot/efiboot.img efi/boot/i386-efi && mcopy -i /boot/efiboot.img /usr/lib/grub/i386-efi/*.mod ::efi/boot/i386-efi && \
-      mkdir -p /EFI/BOOT/i386-efi && cp /usr/lib/grub/i386-efi/*.mod /EFI/BOOT/i386-efi && \
-      echo "insmod linux" >> "/EFI/BOOT/grub.cfg" && echo "configfile /boot/grub/grub.cfg" >> "/EFI/BOOT/grub.cfg"
-
-## mac boot madness is just pilfered from fedora ;)
-RUN wget -o /boot/macboot.img http://mirrors.kernel.org/fedora/releases/28/Server/x86_64/os/images/macboot.img && rm -f /macboot.img
 
 # when/if we run grub-install
 ADD grub.d/* /etc/grub.d/
@@ -130,16 +118,6 @@ RUN find /etc/systemd/network -type f -exec chmod a+r {} \;
 ADD platform-info/platform-info.service /etc/systemd/system/platform-info.service
 ADD platform-info/platform-info.sh      /usr/local/sbin/platform-info.sh
 RUN ln -sf /etc/systemd/system/platform-info.service "/etc/systemd/system/multi-user.target.wants/platform-info.service"
-
-# disable hpsmhd, mdadm, smartd on virtual hosts
-ADD hpsmhd.service /etc/systemd/system/hpsmhd.service
-RUN ln -sf /etc/systemd/system/hpsmhd.service "/etc/systemd/system/multi-user.target.wants/hpsmhd.service"
-
-ADD mdadm.service /etc/systemd/system/mdadm.service
-RUN ln -sf /etc/systemd/system/mdadm.service "/etc/systemd/system/multi-user.target.wants/mdadm.service"
-
-RUN mkdir -p /etc/systemd/system/smartd.service.d
-ADD smartd.service.d /etc/systemd/system/smartd.service.d
 
 # service to start console if we find a hvc0 console *shrug*
 ADD hvc0-console.service /etc/systemd/system/hvc0-console.service
