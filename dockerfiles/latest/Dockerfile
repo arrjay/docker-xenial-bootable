@@ -37,7 +37,7 @@ RUN dpkg-divert --rename /usr/sbin/update-grub && ln -s /bin/true /usr/sbin/upda
     rm -f /etc/ssh/ssh_host_* && \
     rm -f /etc/dracut.conf.d/iomemory-vsl.conf && \
     sed -i \
-      -e 's/splash/video=720x400 vt.color=0x30 consoleblank=0 vt.default_red=7,220,133,181,38,211,42,238,0,203,88,101,131,108,147,253 vt.default_grn=54,50,153,137,139,54,161,232,43,75,110,123,148,113,161,246 vt.default_blu=66,47,0,0,210,130,152,213,54,22,117,131,150,196,161,227 vt.color=0x70/' \
+      -e 's/splash/video=720x400 consoleblank=0 vt.default_red=7,220,133,181,38,211,42,238,0,203,88,101,131,108,147,253 vt.default_grn=54,50,153,137,139,54,161,232,43,75,110,123,148,113,161,246 vt.default_blu=66,47,0,0,210,130,152,213,54,22,117,131,150,196,161,227 vt.color=0x70 network-config=e2NvbmZpZzogZGlzYWJsZWR9/' \
       /etc/default/grub && \
     printf 'GRUB_DISABLE_OS_PROBER=true\n' >> /etc/default/grub && \
     rm /usr/sbin/update-grub && dpkg-divert --rename --remove /usr/sbin/update-grub && \
@@ -116,6 +116,8 @@ RUN ln -sf /lib/systemd/system/systemd-networkd.service "/etc/systemd/system/mul
     rm -f "/etc/systemd/system/multi-user.target.wants/NetworkManager.service" && \
     rm -f "/etc/systemd/system/dbus-org.freedesktop.nm-dispatcher.service" && \
     mkdir -p "/etc/systemd/network" && \
+    rm -f "/etc/systemd/system/cloud-init.target.wants/cloud-init-local.service" && \
+    ln -sf /dev/null "/etc/systemd/system/cloud-init-local.service" && \
     rm -f "/etc/network/interfaces"
 ADD /systemd-network /etc/systemd/network
 RUN find /etc/systemd/network -type f -exec chmod a+r {} \;
