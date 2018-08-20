@@ -4,7 +4,8 @@ MAINTAINER RJ Bergeron <rbergero@gmail.com>
 
 # re-configure apt
 RUN apt-get update && \
-    env LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get install -q -y software-properties-common && \
+    env LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get --no-install-recommends install -q -y \
+     software-properties-common && \
     apt-get -q -y clean all && rm -rf /var/lib/apt/lists/*
 
 RUN add-apt-repository -m ppa:notarrjay/fio-dkms
@@ -21,7 +22,8 @@ RUN echo "deb http://red-jay.github.io/fio-drivers fio release" > /etc/apt/sourc
 RUN dpkg-divert --rename /usr/sbin/update-grub && ln -s /bin/true /usr/sbin/update-grub && \
     dpkg-divert --rename /etc/cloud/cloud.cfg.d/90_dpkg.cfg && \
     apt-get update && \
-    env LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get install -q -y ubuntu-standard \
+    env LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get --no-install-recommends install -q -y \
+                 ubuntu-standard \
                  casper lupin-casper discover laptop-detect os-prober \
                  linux-generic dracut-core dbus \
                  lvm2 thin-provisioning-tools cryptsetup mdadm xfsprogs bcache-tools \
@@ -32,7 +34,9 @@ RUN dpkg-divert --rename /usr/sbin/update-grub && ln -s /bin/true /usr/sbin/upda
                  tboot \
                  iomemory-vsl-dkms \
 		 fio-common fio-preinstall fio-sysvinit fio-util \
-                 grub-efi-amd64-bin grub-efi-ia32-bin grub-efi-amd64-signed shim-signed shim syslinux syslinux-utils isolinux hfsprogs hfsplus && \
+                 grub-efi-amd64-bin grub-efi-ia32-bin grub-efi-amd64-signed shim-signed shim \
+                 syslinux syslinux-utils syslinux-common \
+                 isolinux hfsprogs hfsplus && \
     apt-get -q -y clean all && rm -rf /var/lib/apt/lists/* && \
     rm -f /etc/ssh/ssh_host_* && \
     rm -f /etc/dracut.conf.d/iomemory-vsl.conf && \
