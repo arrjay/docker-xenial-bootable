@@ -20,6 +20,13 @@ RUN apt-get update && \
      dpkg-dev debhelper dput devscripts ubuntu-dev-tools equivs && \
     apt-get -q -y clean all && rm -rf /var/lib/apt/lists/*
 
+FROM common as equiv-build
+LABEL stage=equiv-build
+
+MAINTAINER RJ <rbergero@gmail.com>
+
+RUN equivs-control fake-grub-pc
+
 FROM common
 LABEL stage=final
 
