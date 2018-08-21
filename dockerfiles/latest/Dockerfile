@@ -29,7 +29,7 @@ RUN dpkg-divert --rename /usr/sbin/update-grub && ln -s /bin/true /usr/sbin/upda
                  linux-generic dracut-core dbus \
                  lvm2 thin-provisioning-tools cryptsetup mdadm xfsprogs bcache-tools \
                  memtest86+ nwipe smartmontools lm-sensors ethtool smartmontools fio \
-                 openssh-server augeas-tools \
+                 openssh-server sudo augeas-tools \
                  cloud-init \
 		 open-vm-tools \
                  tboot \
