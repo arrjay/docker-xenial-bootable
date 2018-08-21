@@ -11,6 +11,7 @@ RUN apt-get update && \
     rm /usr/lib/dkms/dkms_autoinstaller && dpkg-divert --rename --remove /usr/lib/dkms/dkms_autoinstaller
 
 FROM common as dev
+LABEL stage=dev
 
 MAINTAINER RJ <rbergero@gmail.com>
 
@@ -20,6 +21,7 @@ RUN apt-get update && \
     apt-get -q -y clean all && rm -rf /var/lib/apt/lists/*
 
 FROM common
+LABEL stage=final
 
 MAINTAINER RJ <rbergero@gmail.com>
 

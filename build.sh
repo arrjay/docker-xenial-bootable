@@ -9,8 +9,7 @@ set -ex
 
 set -u
 
-for d in dockerfiles/*/Dockerfile ; do
-  image=${d#dockerfiles/}
-  image=${image%/Dockerfile}
-  docker build -t "build/${image}" -f "${d}" .
-done
+docker build -t "build/latest" .
+
+devimg=$(docker images --filter "label=stage=dev" --format "{{.CreatedAt}}\t{{.ID}}"|sort -nr|head -n1|cut -f2)
+docker tag "${devimg}" "build/dev"
