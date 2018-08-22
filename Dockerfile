@@ -147,6 +147,16 @@ ADD platform-info/platform-info.service /etc/systemd/system/platform-info.servic
 ADD platform-info/platform-info.sh      /usr/local/sbin/platform-info.sh
 RUN ln -sf /etc/systemd/system/platform-info.service "/etc/systemd/system/multi-user.target.wants/platform-info.service"
 
+# disable hpsmhd, mdadm, smartd on virtual hosts
+ADD hpsmhd.service /etc/systemd/system/hpsmhd.service
+RUN ln -sf /etc/systemd/system/hpsmhd.service "/etc/systemd/system/multi-user.target.wants/hpsmhd.service"
+
+ADD mdadm.service /etc/systemd/system/mdadm.service
+RUN ln -sf /etc/systemd/system/mdadm.service "/etc/systemd/system/multi-user.target.wants/mdadm.service"
+
+RUN mkdir -p /etc/systemd/system/smartd.service.d
+ADD smartd.service.d /etc/systemd/system/smartd.service.d
+
 # service to start console if we find a hvc0 console *shrug*
 ADD hvc0-console.service /etc/systemd/system/hvc0-console.service
 
