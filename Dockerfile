@@ -10,23 +10,27 @@ RUN apt-get update && \
     rm /usr/bin/dracut && dpkg-divert --rename --remove /usr/bin/dracut && \
     rm /usr/lib/dkms/dkms_autoinstaller && dpkg-divert --rename --remove /usr/lib/dkms/dkms_autoinstaller
 
+# build dev here...
 FROM common as dev
-LABEL stage=dev
-
-MAINTAINER RJ <rbergero@gmail.com>
 
 RUN apt-get update && \
     env LC_ALL=C DEBIAN_FRONTEND=noninteractive apt-get --no-install-recommends install -q -y \
      dpkg-dev debhelper dput devscripts ubuntu-dev-tools equivs && \
     apt-get -q -y clean all && rm -rf /var/lib/apt/lists/*
 
-FROM common as equiv-build
-LABEL stage=equiv-build
+# now build some equiv packages for local override policy
+FROM dev as equiv-build
+
+COPY fake-grub-pc /
+RUN equivs-build /fake-grub-pc
+
+# go _backwards_ so we can tag dev in 18.06.0.ce...
+FROM dev
+LABEL stage=dev
 
 MAINTAINER RJ <rbergero@gmail.com>
 
-RUN equivs-control fake-grub-pc
-
+# now, build the final image.
 FROM common
 LABEL stage=final
 
@@ -47,6 +51,11 @@ RUN echo "deb http://downloads.linux.hpe.com/SDR/downloads/MCP/ubuntu xenial/cur
 
 RUN echo "deb http://red-jay.github.io/fio-drivers fio release" > /etc/apt/sources.list.d/fio.list && \
     apt-key add /etc/apt/trusted.gpg.d/fio.asc
+
+# install equivs
+COPY --from=equiv-build /*.deb /
+
+RUN dpkg -i /*.deb && rm -rf /*.deb
 
 # install packages
 RUN dpkg-divert --rename /usr/sbin/update-grub && ln -s /bin/true /usr/sbin/update-grub && \
