@@ -2,7 +2,10 @@
 
 pi_dir=/run/platform-info
 
-for f in /sys/class/dmi/id/board_vendor /sys/class/dmi/id/chassis_vendor /sys/class/dmi/id/bios_version /sys/class/dmi/id/board_version ; do
+for f in /sys/class/dmi/id/board_vendor /sys/class/dmi/id/chassis_vendor \
+         /sys/class/dmi/id/bios_version /sys/class/dmi/id/board_version \
+         /sys/class/dmi/id/product_name
+do
   words=''
   if [ -f "${f}" ] ; then
     b="${f##*/}"
@@ -11,7 +14,7 @@ for f in /sys/class/dmi/id/board_vendor /sys/class/dmi/id/chassis_vendor /sys/cl
     read -r words < "${f}"
     for word in ${words} ; do
       case "${word}" in
-        "."|".."|"/"|"\\"|"\n") : ;;
+        "."|".."|"/"|"\\"|"\\n") : ;;
         *) touch "${worddir}/${word,,}" ;;
       esac
     done
